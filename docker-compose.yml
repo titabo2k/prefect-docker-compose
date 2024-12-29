@@ -58,7 +58,7 @@ services:
     restart: always
     entrypoint: ["/opt/prefect/entrypoint.sh", "prefect", "agent", "start", "-q", "YOUR_WORK_QUEUE_NAME"]
     environment:
-      - PREFECT_API_URL=http://server:4200/api
+      - PREFECT_API_URL=http://prefect_server:4200/api
 #       Use PREFECT_API_KEY if connecting the agent to Prefect Cloud
 #     - PREFECT_API_KEY=YOUR_API_KEY
     profiles: ["agent"]
@@ -72,7 +72,7 @@ services:
     volumes:
       - "./flows:/root/flows"
     environment:
-      - PREFECT_API_URL=http://server:4200/api
+      - PREFECT_API_URL=http://prefect_server:4200/api
 #       Use PREFECT_API_KEY to use the CLI to interact with Prefect Cloud
 #     - PREFECT_API_KEY=YOUR_API_KEY
     profiles: ["cli"]
