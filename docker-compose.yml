@@ -20,7 +20,7 @@ services:
     image: minio/minio:latest
     entrypoint: ["minio", "server", "--address", "0.0.0.0:9000", "--console-address", "0.0.0.0:9001", "/data"]
     volumes:
-      - "minio:/data"
+      - ./data/minio:/data
     ports:
       - 9000:9000
       - 9001:9001
@@ -32,7 +32,7 @@ services:
     image: prefecthq/prefect:3.1-python3.11
     restart: always
     volumes:
-      - prefect:/root/.prefect
+      - ./data/prefect:/root/.prefect
     entrypoint: ["/opt/prefect/entrypoint.sh", "prefect", "server", "start"]
     environment:
       - PREFECT_UI_URL=http://127.0.0.1:4200/api
