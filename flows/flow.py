@@ -1,4 +1,5 @@
 from prefect import flow, task
+from pathlib import Path
 
 
 @task
@@ -19,5 +20,11 @@ def greetings(names=["arthur", "trillian", "ford", "marvin"]):
 
 
 if __name__ == "__main__":
-    greetings(["arthur", "trillian", "ford", "marvin"])
-    # greetings(["arthur", "trillian", "ford", "marvin"]).from_source().de
+    greetings.from_source(
+        source=str(Path(__file__).parent),
+        entrypoint="flow.py:greetings",
+    ).deploy(
+        name="foo_deployment",
+        parameters=dict(names=["arthur", "trillian", "ford", "marvin"]),
+        work_pool_name="test_flow_pool",
+    )
