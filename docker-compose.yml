@@ -10,8 +10,8 @@ services:
       - POSTGRES_DB=prefect
     expose:
       - 5432
-    volumes:
-      - ./data/db:/var/lib/postgresql/data
+    # volumes:
+    #   - ./data/db:/var/lib/postgresql/data
     profiles: ["server"]
 
   ### MinIO for flow storage
@@ -25,8 +25,8 @@ services:
       mc mb myminio/prefect;
       mc policy set public myminio/prefect) &
       minio server --address 0.0.0.0:9000 --console-address 0.0.0.0:9001 /data"
-    volumes:
-      - ./data/minio:/data
+    # volumes:
+    #   - ./data/minio:/data
     ports:
       - 9000:9000
       - 9001:9001
@@ -37,8 +37,8 @@ services:
     container_name: prefect_server
     image: prefecthq/prefect:3.1-python3.11
     restart: always
-    volumes:
-      - ./data/prefect:/root/.prefect
+    # volumes:
+    #   - ./data/prefect:/root/.prefect
     entrypoint: ["/opt/prefect/entrypoint.sh", "prefect", "server", "start"]
     environment:
       - PREFECT_UI_URL=http://127.0.0.1:4200/api
@@ -74,6 +74,8 @@ services:
         "start",
         "-p",
         "test_flow_pool",
+        "--type",
+        "process",
       ]
     environment:
       - PREFECT_API_URL=http://prefect_server:4200/api
@@ -103,10 +105,10 @@ services:
       # - PREFECT_API_KEY=YOUR_API_KEY
     profiles: ["cli"]
 
-volumes:
-  prefect:
-  db:
-  minio:
+# volumes:
+#   prefect:
+#   db:
+#   minio:
 networks:
   default:
     name: prefect-network
