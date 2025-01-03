@@ -10,21 +10,27 @@ services:
       - POSTGRES_DB=prefect
     expose:
       - 5432
-    volumes: 
+    volumes:
       - ./data/db:/var/lib/postgresql/data
     profiles: ["server"]
-  
+
   ### MinIO for flow storage
   prefect_minio:
     container_name: prefect_minio
     image: minio/minio:latest
-    entrypoint: ["minio", "server", "--address", "0.0.0.0:9000", "--console-address", "0.0.0.0:9001", "/data"]
+    entrypoint: >
+      /bin/sh -c "
+      (sleep 5;
+      mc alias set myminio http://localhost:9000 minioadmin minioadmin;
+      mc mb myminio/prefect;
+      mc policy set public myminio/prefect) &
+      minio server --address 0.0.0.0:9000 --console-address 0.0.0.0:9001 /data"
     volumes:
       - ./data/minio:/data
     ports:
       - 9000:9000
       - 9001:9001
-    profiles: ["minio"]
+    profiles: ["server"]
 
   ### Prefect Server API and UI
   prefect_server:
@@ -49,19 +55,35 @@ services:
       - 4200:4200
     depends_on:
       - prefect_database
+      - prefect_minio
     profiles: ["server"]
 
-  ## Prefect Agent
-  prefect_agent:
-    container_name: prefect_agent
+  ## Prefect Worker
+  prefect_worker:
+    container_name: prefect_worker
     image: prefecthq/prefect:3.1-python3.11
     restart: always
-    entrypoint: ["/opt/prefect/entrypoint.sh", "prefect", "agent", "start", "-q", "YOUR_WORK_QUEUE_NAME"]
+    working_dir: "/root/flows"
+    volumes:
+      - "./flows:/root/flows"
+    entrypoint:
+      [
+        "/opt/prefect/entrypoint.sh",
+        "prefect",
+        "worker",
+        "start",
+        "-p",
+        "test_flow_pool",
+      ]
     environment:
       - PREFECT_API_URL=http://prefect_server:4200/api
-#       Use PREFECT_API_KEY if connecting the agent to Prefect Cloud
-#     - PREFECT_API_KEY=YOUR_API_KEY
-    profiles: ["agent"]
+      - MINIO_ENDPOINT=http://prefect_minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - PREFECT_STORAGE_BUCKET=prefect
+      # Use PREFECT_API_KEY if connecting the agent to Prefect Cloud
+      # - PREFECT_API_KEY=YOUR_API_KEY
+    profiles: ["worker"]
 
   ### Prefect CLI
   prefect_cli:
@@ -73,10 +95,14 @@ services:
       - "./flows:/root/flows"
     environment:
       - PREFECT_API_URL=http://prefect_server:4200/api
-#       Use PREFECT_API_KEY to use the CLI to interact with Prefect Cloud
-#     - PREFECT_API_KEY=YOUR_API_KEY
+      - MINIO_ENDPOINT=http://prefect_minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - PREFECT_STORAGE_BUCKET=prefect
+      # Use PREFECT_API_KEY to use the CLI to interact with Prefect Cloud
+      # - PREFECT_API_KEY=YOUR_API_KEY
     profiles: ["cli"]
-      
+
 volumes:
   prefect:
   db:
