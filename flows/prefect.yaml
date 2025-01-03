@@ -19,7 +19,7 @@ pull:
 
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
-  - name: default
+  - name: test_deployment
     version: null
     tags: []
     concurrency_limit: null
@@ -31,11 +31,11 @@ deployments:
       work_queue_name: null
       job_variables: {}
     enforce_parameter_schema: true
-    schedules:
-      - interval: 60.0
-        anchor_date: "2024-12-29T16:14:43.831020+00:00"
-        timezone: UTC
-        active: true
+    # schedules:
+    #   - interval: 60.0
+    #     anchor_date: "2024-12-29T16:14:43.831020+00:00"
+    #     timezone: UTC
+    #     active: true
 
 # env section allows you to provide environment variables for your flows
 env:
