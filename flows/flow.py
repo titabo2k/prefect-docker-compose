@@ -12,7 +12,7 @@ def say_goodbye(name):
     print(f"goodbye {name}")
 
 
-@flow(name="test flow")
+@flow(name="test_flow")
 def greetings(names=["arthur", "trillian", "ford", "marvin"]):
     for name in names:
         say_hello(name)
@@ -26,5 +26,5 @@ if __name__ == "__main__":
     ).deploy(
         name="foo_deployment",
         parameters=dict(names=["arthur", "trillian", "ford", "marvin"]),
-        work_pool_name="test_flow_pool",
+        work_pool_name="test_pool",
     )
