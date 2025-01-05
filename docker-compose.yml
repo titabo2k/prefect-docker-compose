@@ -63,9 +63,9 @@ services:
     container_name: prefect_worker
     image: prefecthq/prefect:3.1-python3.11
     restart: always
-    working_dir: "/root/flows"
+    working_dir: "/app"
     volumes:
-      - "./flows:/root/flows"
+      - ".:/app/"
     entrypoint:
       [
         "/opt/prefect/entrypoint.sh",
@@ -73,7 +73,7 @@ services:
         "worker",
         "start",
         "-p",
-        "test_flow_pool",
+        "test_pool",
         "--type",
         "process",
       ]
@@ -92,9 +92,9 @@ services:
     container_name: prefect_cli
     image: prefecthq/prefect:3.1-python3.11
     entrypoint: "/bin/bash"
-    working_dir: "/root/flows"
+    working_dir: "/app"
     volumes:
-      - "./flows:/root/flows"
+      - ".:/app/"
     environment:
       - PREFECT_API_URL=http://prefect_server:4200/api
       - MINIO_ENDPOINT=http://prefect_minio:9000
